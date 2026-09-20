@@ -432,6 +432,15 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.25rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.results-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
 }
 
 .results-meta {
@@ -514,6 +523,33 @@ body {
 .grid-actions {
   display: flex;
   gap: 0.35rem;
+}
+
+.btn-copy-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: var(--radius-sm);
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-copy-card:hover {
+  background-color: var(--primary-light);
+  border-color: var(--primary);
+  color: #ffffff;
+}
+
+.btn-copy-card.copied {
+  background-color: rgba(16, 185, 129, 0.15);
+  border-color: var(--accent-emerald);
+  color: var(--accent-emerald);
 }
 
 .icon-btn {

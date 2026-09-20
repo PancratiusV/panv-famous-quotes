@@ -107,9 +107,19 @@
           <span class="results-title">Quotes Collection</span>
           <span class="results-badge" id="results-count">Showing 100 quotes</span>
         </div>
-        <button class="btn btn-outline" id="random-filtered-btn">
-          <span>🎲 Random from current selection</span>
-        </button>
+        <div class="results-actions">
+          <button class="btn btn-outline" id="export-csv-btn" title="Export currently viewed quotes to CSV">
+            <svg class="icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            <span>Export to CSV</span>
+          </button>
+          <button class="btn btn-outline" id="random-filtered-btn">
+            <span>🎲 Random from selection</span>
+          </button>
+        </div>
       </div>
 
       <!-- Quotes Grid Results -->

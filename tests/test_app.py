@@ -142,3 +142,26 @@ def test_static_assets(client):
     assert js_res.status_code == 200
     assert "javascript" in js_res.content_type
 
+
+def test_export_csv_all(client):
+    """Verify CSV export returns valid CSV content for all quotes."""
+    res = client.get("/api/quotes/export")
+    assert res.status_code == 200
+    assert "text/csv" in res.content_type
+    assert "attachment; filename=quotes.csv" in res.headers["Content-Disposition"]
+    lines = res.data.decode("utf-8-sig").strip().splitlines()
+    assert len(lines) == 101  # Header + 100 quotes
+    assert lines[0] == "ID,Quote,Author,Category"
+
+
+def test_export_csv_filtered(client):
+    """Verify CSV export respects category and author filters."""
+    res = client.get("/api/quotes/export?category=Science")
+    assert res.status_code == 200
+    lines = res.data.decode("utf-8-sig").strip().splitlines()
+    assert len(lines) > 1
+    assert lines[0] == "ID,Quote,Author,Category"
+    # All rows should contain Science
+    for row in lines[1:]:
+        assert "Science" in row
+

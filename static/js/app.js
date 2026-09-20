@@ -32,6 +32,7 @@ const DOM = {
   quotesGrid: document.getElementById('quotes-grid'),
   resultsCount: document.getElementById('results-count'),
   randomFilteredBtn: document.getElementById('random-filtered-btn'),
+  exportCsvBtn: document.getElementById('export-csv-btn'),
   emptyState: document.getElementById('empty-state'),
   resetFiltersBtn: document.getElementById('reset-filters-btn'),
   
@@ -76,6 +77,41 @@ async function copyToClipboard(text) {
   } catch (err) {
     showToast('Failed to copy quote to clipboard');
   }
+}
+
+/**
+ * Export quotes collection to downloadable CSV format.
+ */
+function exportQuotesToCSV(quotes) {
+  if (!quotes || quotes.length === 0) {
+    showToast('No quotes available to export');
+    return;
+  }
+
+  const headers = ['ID', 'Quote', 'Author', 'Category'];
+  const rows = quotes.map(q => [
+    q.id,
+    `"${String(q.quote).replace(/"/g, '""')}"`,
+    `"${String(q.author).replace(/"/g, '""')}"`,
+    `"${String(q.category).replace(/"/g, '""')}"`
+  ]);
+
+  const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+
+  const timestamp = new Date().toISOString().slice(0, 10);
+  const catPart = state.activeCategory && state.activeCategory !== 'all' ? `_${state.activeCategory}` : '';
+  link.setAttribute('href', url);
+  link.setAttribute('download', `quotes${catPart}_${timestamp}.csv`);
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+
+  showToast(`✓ Exported ${quotes.length} quote${quotes.length === 1 ? '' : 's'} to CSV!`);
 }
 
 /**
@@ -220,11 +256,12 @@ function renderQuotesGrid(quotes) {
           <span style="opacity: 0.6;">—</span> ${quote.author}
         </cite>
         <div class="grid-actions">
-          <button class="icon-btn copy-card-btn" title="Copy this quote" data-id="${quote.id}">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+          <button class="btn-copy-card copy-card-btn" title="Copy this quote" data-id="${quote.id}">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
             </svg>
+            <span class="copy-label">Copy</span>
           </button>
         </div>
       </div>
@@ -248,9 +285,16 @@ function renderQuotesGrid(quotes) {
 
     // Individual copy button on card
     const copyBtn = card.querySelector('.copy-card-btn');
-    copyBtn.addEventListener('click', (e) => {
+    const copyLabel = card.querySelector('.copy-label');
+    copyBtn.addEventListener('click', async (e) => {
       e.stopPropagation();
-      copyToClipboard(`“${quote.quote}” — ${quote.author}`);
+      await copyToClipboard(`“${quote.quote}” — ${quote.author}`);
+      copyBtn.classList.add('copied');
+      copyLabel.textContent = 'Copied!';
+      setTimeout(() => {
+        copyBtn.classList.remove('copied');
+        copyLabel.textContent = 'Copy';
+      }, 1500);
     });
 
     fragment.appendChild(card);
@@ -378,6 +422,13 @@ function setupEventListeners() {
       DOM.featuredCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   });
+
+  // Export quotes to CSV button
+  if (DOM.exportCsvBtn) {
+    DOM.exportCsvBtn.addEventListener('click', () => {
+      exportQuotesToCSV(state.displayedQuotes);
+    });
+  }
 
   // Reset filters button in empty state
   DOM.resetFiltersBtn.addEventListener('click', resetAllFilters);
